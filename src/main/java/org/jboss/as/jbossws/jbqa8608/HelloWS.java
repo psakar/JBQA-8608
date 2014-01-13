@@ -5,9 +5,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-package com.redhat.gss.jaxws;
+package org.jboss.as.jbossws.jbqa8608;
 
 @javax.jws.WebService(portName = "hello")
 public interface HelloWS {
-  public ReturnDate hello(String name);
+  public OutputName hello(String name);
+  public OutputName helloValidateInput(InputName name);
 }

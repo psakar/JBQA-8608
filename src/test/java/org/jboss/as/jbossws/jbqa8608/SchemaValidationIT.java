@@ -19,6 +19,7 @@ package org.jboss.as.jbossws.jbqa8608;
  */
 
 
+import static org.jboss.as.jbossws.jbqa8608.HelloWSImpl.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -26,31 +27,28 @@ import java.net.URL;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.redhat.gss.jaxws.HelloWS;
-import com.redhat.gss.jaxws.HelloWSImpl;
-import com.redhat.gss.jaxws.MyValidationEventHandler;
-import com.redhat.gss.jaxws.ReturnDate;
 
 @RunWith(Arquillian.class)
 @RunAsClient
-public class OutgoingMessageCustomValidationIT
+public class SchemaValidationIT
 {
-  private static final String name = "customValidation";
-  private static final String NAMESPACE = "http://jaxws.gss.redhat.com/"; // revert parts of package name  HelloWS.class.getPackage().getName()
+  private static final String name = "schemaValidation";
+  private static final String NAMESPACE = TestUtils.createNamespaceFromPackageOfClass(HelloWS.class);
   private static final QName SERVICE_QNAME = new QName(NAMESPACE, HelloWS.class.getSimpleName());
   private static final String ENDPOINT_URL = "http://" + TestUtils.getServerBindAddress() + ":" + TestUtils.getServerBindPort() + "/" + name + "/hello";
   private static final String WSDL_URL = ENDPOINT_URL + "?wsdl";
+  private HelloWS port;
 
   @Deployment
   static WebArchive createDeployment() throws Exception {
@@ -58,30 +56,67 @@ public class OutgoingMessageCustomValidationIT
     String contextPath = "src/main/webapp";
     WebArchive archive = ShrinkWrap
         .create(WebArchive.class, name + ".war")
-        .setManifest(new StringAsset("Manifest-Version: 1.0\n" + "Dependencies: org.apache.cxf,org.jboss.modules\n"))//FIXME is modules needed ?
         .addAsWebInfResource(new File(contextPath, "WEB-INF/web.xml"))
-        .addAsWebInfResource(new File(contextPath, "WEB-INF/jbossws-cxf.xml"))
-        //.addAsWebInfResource(new File(contextPath, "WEB-INF/jboss-deployment-structure.xml"))
-        //.addAsManifestResource(new StringAsset("Dependencies: org.springframework.spring:3.2.x\n"), "MANIFEST.MF")
-        .addClass(MyValidationEventHandler.class)
+        .addAsWebInfResource(new File(contextPath, "WEB-INF/jbossws-cxf-only-schema-validation.xml"), "jbossws-cxf.xml")
+        .addClass(CustomSchemaValidationEventHandler.class)
         .addClass(HelloWS.class)
         .addClass(HelloWSImpl.class)
-        .addClass(ReturnDate.class)
-
-         ;
-    archive.as(ZipExporter.class).exportTo(new File("/tmp", archive.getName()), true);
+        .addClass(OutputName.class)
+        .addClass(InputName.class)
+        ;
     return TestUtils.backupArchiveForDebug(archive);
   }
 
-  @Test
-  public void testSecureConversation() throws Exception
-  {
+  @Before
+  public void before() throws Exception {
     URL wsdl = new URL(WSDL_URL);
-
     Service service = Service.create(wsdl, SERVICE_QNAME);
     QName portQName = new QName(NAMESPACE, "hello");
-    HelloWS port = service.getPort(portQName, HelloWS.class);
-    ReturnDate result = port.hello("Kyle");
-    assertNotNull(result.getDate());
+    port = service.getPort(portQName, HelloWS.class);
   }
+
+  @Test
+  public void testOutput() throws Exception
+  {
+    String inputName = "name";
+    OutputName result = port.hello(inputName);
+    assertEquals(inputName, result.getName());
+  }
+
+  @Test(expected = SOAPFaultException.class)
+  public void testOutputValidationFails() throws Exception
+  {
+    String inputName = SET_OUPUT_NAME_TO_NULL;
+    port.hello(inputName);
+  }
+
+  @Test
+  public void testOuputForInputName() throws Exception
+  {
+    String inputName = "name";
+    OutputName result = port.helloValidateInput(new InputName(inputName));
+    assertEquals(inputName, result.getName());
+  }
+
+  @Test
+  public void testInputNameValidationFailureIsHandledByCustomSchemaValidationHandler() throws Exception
+  {
+    OutputName result = port.helloValidateInput(null);
+    assertEquals(NULL_INPUT, result.getName());
+  }
+
+  @Test(expected = SOAPFaultException.class)
+  public void testInputNameValidationFails() throws Exception
+  {
+    OutputName result = port.helloValidateInput(new InputName());
+    assertEquals(NULL_INPUT_NAME, result.getName());
+  }
+
+  @Test(expected = SOAPFaultException.class)
+  public void testOutputValidationFailsForInputName() throws Exception
+  {
+    String inputName = HelloWSImpl.SET_OUPUT_NAME_TO_NULL;
+    port.helloValidateInput(new InputName(inputName));
+  }
+
 }

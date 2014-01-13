@@ -1,7 +1,8 @@
 *JBQA-8608*
 
 run including EAP and spring module installation. Should be run first time or after clean
-
+	
+	unset JBOSS_HOME
 	mvn -Dinstall-eap-6.2 -Dinstall-spring-module-eap-6.2 -Dinstall-as-module-spring-3.2.x -Djbossas-managed-eap-6.2 clean verify
 	
 run without installation

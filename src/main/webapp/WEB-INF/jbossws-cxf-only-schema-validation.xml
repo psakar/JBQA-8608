@@ -8,18 +8,12 @@
        http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
   <jaxws:endpoint id="hello"
-                  address="http://localhost:8080/CustomSchemaValidation/hello"
+                  address="http://localhost:8080/schemaValidation/hello"
                   implementor="org.jboss.as.jbossws.jbqa8608.HelloWSImpl">
     <jaxws:features>
       <cxf:logging/>
     </jaxws:features>
     <jaxws:properties>
-      <entry key="jaxb-validation-event-handler">
-        <bean class="org.jboss.as.jbossws.jbqa8608.CustomSchemaValidationEventHandler" />
-      </entry>
-      <entry key="jaxb-writer-validation-event-handler">
-        <bean class="org.jboss.as.jbossws.jbqa8608.CustomSchemaValidationEventHandler" />
-      </entry>
       <entry key="schema-validation-enabled" value="true"/>
     </jaxws:properties>
   </jaxws:endpoint>
