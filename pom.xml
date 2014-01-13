@@ -50,8 +50,8 @@
 		<version.org.jboss.arquillian.container.arquillian-jbossas-remote-5.1>1.0.0.CR3</version.org.jboss.arquillian.container.arquillian-jbossas-remote-5.1>
 		<version.org.jboss.as.jboss-as-arquillian-container-managed>7.2.0.Final</version.org.jboss.as.jboss-as-arquillian-container-managed>		<version.org.jboss.jbossas.jboss-as-profileservice-client.pom>6.0.0.Final</version.org.jboss.jbossas.jboss-as-profileservice-client.pom>
 		<version.org.jboss.jbossas.jboss-as-client.pom>5.1.0.GA</version.org.jboss.jbossas.jboss-as-client.pom>
-		<!--version.org.jboss.jbossas.jboss-server-manager>1.0.4.Final</version.org.jboss.jbossas.jboss-server-manager-->
-		<version.org.jboss.jbossas.jboss-server-manager>1.0.5-SNAPSHOT</version.org.jboss.jbossas.jboss-server-manager>
+		<version.org.jboss.jbossas.jboss-server-manager>1.0.4.Final</version.org.jboss.jbossas.jboss-server-manager>
+		<!-- version.org.jboss.jbossas.jboss-server-manager>1.0.5-SNAPSHOT</version.org.jboss.jbossas.jboss-server-manager-->
 		<!-- version.org.jboss.ws>3.1.2.SP13</version.org.jboss.ws-->
 		<version.org.slf4j>1.7.2</version.org.slf4j>
 		<version.org.springframework>3.2.5.RELEASE</version.org.springframework>
